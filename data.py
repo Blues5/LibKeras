@@ -43,7 +43,7 @@ def load_data(dataset, data_type, ref, normalization_method):
     We appreciate and thank Liam Cattell from UVa's BME Department for scripting this data.py!
     """
 
-    root = '/home/serim/src/keras/data'
+    root = '/home/gustavo/src/keras/data'
 
     # Check if the dataset exists
     if dataset not in ['imagenet']:
@@ -123,7 +123,7 @@ def load_ot(dataset, root):
     return data, labels
 
 def load_imagenet(dataset, root):
-    
+
     # Amount of files to read
     N_FILES = 1
 
@@ -228,5 +228,5 @@ def pad_array(arr, new_dim=(256, 256)):
 
 # Test the function(s)
 if __name__ == "__main__":
-    root = '/home/serim/src/keras/data'
+    root = '/home/gustavo/src/keras/data'
     data, labels = load_data('imagenet', 'none')
