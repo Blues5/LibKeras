@@ -5,11 +5,11 @@ from __future__ import absolute_import
 
 import warnings
 
+from keras import backend as K
 from keras.models import Model
 from keras.layers import Convolution2D, GlobalMaxPooling2D, AveragePooling2D, GlobalAveragePooling2D
 from keras.layers import Input
 from keras.layers.core import Dense, Flatten
-from keras.layers.normalization import BatchNormalization
 
 WEIGHTS_PATH = '/home/gustavo/src/LibKeras/weights/trained.h5'
 WEIGHTS_PATH_NO_TOP = '/home/gustavo/src/LibKeras/weights/trained_no_top.h5'
