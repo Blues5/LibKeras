@@ -27,7 +27,8 @@ print('Input image shape:', x.shape)
 features = cnet.predict(x, batch_size=1)
 
 # Concatenating to 1-D array
-features = np.squeeze(features)
+features = np.ndarray.flatten(features)
+print("\n[INFO] Output array shape:", features.shape)
 
 # Features output path
 features_path = join(root_out, 'features/' + img_path + '_features.txt');
