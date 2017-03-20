@@ -2,10 +2,21 @@ import h5py
 import numpy as np
 import pandas as pd
 import glob
+from keras import backend as K
 from scipy import io
 from scipy import misc
 from os.path import join, isdir
 import sys
+
+# Input raw dataset dimensions
+WIDTH=224
+HEIGHT=224
+N_CHANNELS=3
+
+# Input OT Maps dimensions
+OT_WIDTH=256
+OT_HEIGHT=256
+OT_CHANNELS=2
 
 def load_data(dataset, data_type, ref, normalization_method):
     """
@@ -19,7 +30,7 @@ def load_data(dataset, data_type, ref, normalization_method):
     Parameters
     ----------
     dataset : str
-        Dataset to return ('imagenet')
+        Dataset name to compose output files
 
     data_type : str (optional)
         Return images, transport maps or image derivatives
@@ -43,11 +54,7 @@ def load_data(dataset, data_type, ref, normalization_method):
     We appreciate and thank Liam Cattell from UVa's BME Department for scripting this data.py!
     """
 
-    root = '/home/gustavo/src/keras/data'
-
-    # Check if the dataset exists
-    if dataset not in ['imagenet']:
-        raise ValueError("Unknown dataset: '%s'" % dataset)
+    root = '/home/gustavo/src/LibKeras/data'
 
     # Check if the data type exists (image, ot or derivative)
     if data_type == 'image':
@@ -71,71 +78,29 @@ def load_data(dataset, data_type, ref, normalization_method):
     elif normalization_method == 'none':
         data = data
     else:
-        raise ValueError("Wrong normalization method.")
+        raise ValueError("Unknown normalization method: '%s'" % data_type)
 
     return data, labels
 
 def load_image(dataset, root):
 
-    # Loading desired dataset
-    if dataset == 'imagenet':
-        data, labels = load_imagenet(dataset, root)
-    else:
-        return
-
-    return data, labels
-
-def load_derivative(dataset, root):
-
-    # Loading initial images
-    data, labels = load_image(dataset, root)
-
-    # Compute the derivative of the images in each direction
-    dx = np.gradient(np.squeeze(data[:,:,:,0]), axis=2)
-    dy = np.gradient(np.squeeze(data[:,:,:,0]), axis=1)
-
-    data[:,:,:,0] = dx
-    data[:,:,:,1] = dy
-
-    return data, labels
-
-def load_ot(dataset, root):
-
-    # Load the transport maps
-    fpath = join(root, 'ot_maps', dataset + '_maps.mat')
-    datamat = io.loadmat(fpath)
-
-    # Dataset dimensions
-    h, w, n_imgs = datamat['f'].shape
-
-    # Initialise the data array
-    data = np.zeros((n_imgs, 256, 256, 2))
-
-    # Create meshgrind according to desired dimensions
-    x, y = np.meshgrid(np.arange(0,w), np.arange(0,h))
-    for i in range(n_imgs):
-        # Subtract x from the transport maps, and pad the resulting image
-        data[i,:,:,0] = pad_array(datamat['f'][:,:,i] - x)
-        data[i,:,:,1] = pad_array(datamat['g'][:,:,i] - y)
-
-    labels = datamat['label'].astype('uint8')
-
-    return data, labels
-
-def load_imagenet(dataset, root):
-
     # Amount of files to read
     N_FILES = 1
 
-    # Load imagenet files
+    # Load input .mat files
     paths = list()
     for i in range(0, N_FILES):
-    	#fpath = join(root, 'raw', dataset + '_data_' + str(i*25+1) + '-' + str((i+1)*25) + '.mat')
-    	fpath = join(root, 'raw', dataset + '.mat')
+    	fpath = join(root, 'raw', dataset + '_' + str(i+1) + '.mat')
     	paths.append(fpath)
 
     labels = np.empty((0, 1))
-    data = np.empty((0, 224, 224, 3))
+    # Instanciating data array according to backend's data format
+    data_format = K.image_data_format()
+    assert data_format in {'channels_last', 'channels_first'}
+    if data_format == 'channels_last':
+        data = np.empty((0, WIDTH, HEIGHT, N_CHANNELS))
+    else:
+        data = np.empty((0, N_CHANNELS, WIDTH, HEIGHT))
 
     # Looping and concatenating all .mat files
     for k in paths:
@@ -149,19 +114,95 @@ def load_imagenet(dataset, root):
 
     return data, labels
 
+def load_derivative(dataset, root):
+
+    # Loading initial images
+    data, labels = load_image(dataset, root)
+
+    # Getting actual data format
+    data_format = K.image_data_format()
+    assert data_format in {'channels_last', 'channels_first'}
+
+    if data_format == 'channels_last':
+        # Compute the derivative of the images in each direction
+        dx = np.gradient(np.squeeze(data[:,:,:,0]), axis=2)
+        dy = np.gradient(np.squeeze(data[:,:,:,0]), axis=1)
+
+        data[:,:,:,0] = dx
+        data[:,:,:,1] = dy
+    else:
+        # Compute the derivative of the images in each direction
+        dx = np.gradient(np.squeeze(data[:,0,:,:]), axis=2)
+        dy = np.gradient(np.squeeze(data[:,0,:,:]), axis=1)
+
+        data[:,0,:,:] = dx
+        data[:,1,:,:] = dy
+
+    return data, labels
+
+def load_ot(dataset, root):
+
+    # Load the transport maps
+    fpath = join(root, 'ot_maps', dataset + '_maps.mat')
+    datamat = io.loadmat(fpath)
+
+    # Dataset dimensions
+    h, w, n_imgs = datamat['f'].shape
+    data_format = K.image_data_format()
+
+    # Instanciating data array according to backend's data format
+    assert data_format in {'channels_last', 'channels_first'}
+    if data_format == 'channels_last':
+        data = np.zeros((n_imgs, OT_WIDTH, OT_HEIGHT, OT_CHANNELS))
+    else:
+        data = np.zeros((n_imgs, OT_CHANNELS, OT_WIDTH, OT_HEIGHT))
+
+    # Create meshgrind according to desired dimensions
+    x, y = np.meshgrid(np.arange(0,w), np.arange(0,h))
+    for i in range(n_imgs):
+        if data_format == 'channels_last':
+            # Subtract x from the transport maps, and pad the resulting image
+            data[i,:,:,0] = pad_array(datamat['f'][:,:,i] - x)
+            data[i,:,:,1] = pad_array(datamat['g'][:,:,i] - y)
+        else:
+            # Subtract x from the transport maps, and pad the resulting image
+            data[i,0,:,:] = pad_array(datamat['f'][:,:,i] - x)
+            data[i,1,:,:] = pad_array(datamat['g'][:,:,i] - y)
+
+    labels = datamat['label'].astype('uint8')
+
+    return data, labels
+
 def multiply_reference(data, dataset, root):
 
-    # Loading initial dimensions
-    [N,C,P,Q] = data.shape
+    # Getting actual data format
+    data_format = K.image_data_format()
+    assert data_format in {'channels_last', 'channels_first'}
 
-    # Loading .mat reference file
-    dataset = io.loadmat(join(root, 'references/' + dataset + '_reference.mat'))
-    I0 = dataset['I0']
-    I0 = np.asarray(I0);
-    I0 = pad_array(I0[:,:,4])
+    if data_format == 'channels_last':
+        # Loading initial dimensions
+        [N,P,Q,C] = data.shape
 
-    I0 = np.tile(I0.reshape((1,P,Q)), (1,1,C))
-    I0 = np.tile(I0.reshape((1,P,Q,C)), (N,1,1,1))
+        # Loading .mat reference file
+        dataset = io.loadmat(join(root, 'references/' + dataset + '_reference.mat'))
+        I0 = dataset['I0']
+        I0 = np.asarray(I0);
+        I0 = pad_array(I0[:,:,4])
+
+        I0 = np.tile(I0.reshape((1,P,Q)), (1,1,C))
+        I0 = np.tile(I0.reshape((1,P,Q,C)), (N,1,1,1))
+    else:
+        # Loading initial dimensions
+        [N,C,P,Q] = data.shape
+
+        # Loading .mat reference file
+        dataset = io.loadmat(join(root, 'references/' + dataset + '_reference.mat'))
+        I0 = dataset['I0']
+        I0 = np.asarray(I0);
+        I0 = pad_array(I0[:,:,4])
+
+        I0 = np.tile(I0.reshape((1,P,Q)), (C,1,1))
+        I0 = np.tile(I0.reshape((1,C,P,Q)), (N,1,1,1))
 
     # Multiplying ot maps by their reference
     data = np.multiply(data, np.sqrt(I0))
@@ -170,42 +211,81 @@ def multiply_reference(data, dataset, root):
 
 def normalize_feature(img):
 
-    # Loading initial dimensions
-    [N,P,Q,C] = img.shape
+    # Getting actual data format
+    data_format = K.image_data_format()
+    assert data_format in {'channels_last', 'channels_first'}
 
-    # Normalizing features
-    mean_img = np.mean(img, axis = 0)
-    std_img = np.std(img, axis=0)
+    if data_format == 'channels_last':
+        # Loading initial dimensions
+        [N,P,Q,C] = img.shape
 
-    if mean_img.shape != (P,Q,C) or std_img.shape != (P,Q,C):
-        raise ValueError("Mean and Standard Deviation size is wrong.")
+        # Normalizing features
+        mean_img = np.mean(img, axis = 0)
+        std_img = np.std(img, axis=0)
 
-    # Stop divide-by-zero errors, by replacing small standard deviations with 1
-    std_img[std_img<1.0e-12] = 1
+        if mean_img.shape != (P,Q,C) or std_img.shape != (P,Q,C):
+            raise ValueError("Mean and Standard Deviation size is wrong.")
 
-    # Outputting final images
-    img = img - np.tile(mean_img.reshape((1,P,Q,C)), (N,1,1,1))
-    img = img / np.tile(std_img.reshape((1,P,Q,C)), (N,1,1,1))
+        # Stop divide-by-zero errors, by replacing small standard deviations with 1
+        std_img[std_img<1.0e-12] = 1
+
+        # Outputting final images
+        img = img - np.tile(mean_img.reshape((1,P,Q,C)), (N,1,1,1))
+        img = img / np.tile(std_img.reshape((1,P,Q,C)), (N,1,1,1))
+    else:
+        # Loading initial dimensions
+        [N,C,P,Q] = img.shape
+
+        # Normalizing features
+        mean_img = np.mean(img, axis = 0)
+        std_img = np.std(img, axis=0)
+
+        if mean_img.shape != (C,P,Q) or std_img.shape != (C,P,Q):
+            raise ValueError("Mean and Standard Deviation size is wrong.")
+
+        # Stop divide-by-zero errors, by replacing small standard deviations with 1
+        std_img[std_img<1.0e-12] = 1
+
+        # Outputting final images
+        img = img - np.tile(mean_img.reshape((1,C,P,Q)), (N,1,1,1))
+        img = img / np.tile(std_img.reshape((1,C,P,Q)), (N,1,1,1))
 
     return img
 
 def normalize_image(img):
 
-    # Loading initial dimensions
-    [N,P,Q,C] = img.shape;
+    # Getting actual data format
+    data_format = K.image_data_format()
+    assert data_format in {'channels_last', 'channels_first'}
 
-    # Looping for all images and channels
-    for i in range(N):
-        for c in range(C):
-            mu = np.mean(np.squeeze(img[i,:,:,c]))
-            std = np.std(np.squeeze(img[i,:,:,c]))
-            img[i,:,:,c] = (img[i,:,:,c] - mu)/std
-            if std < 1.0e-12:
-                raise ValueError("Standard Deviation is too small. Watch out!")
+    if data_format == 'channels_last':
+        # Loading initial dimensions
+        [N,P,Q,C] = img.shape;
+
+        # Looping for all images and channels
+        for i in range(N):
+            for c in range(C):
+                mu = np.mean(np.squeeze(img[i,:,:,c]))
+                std = np.std(np.squeeze(img[i,:,:,c]))
+                img[i,:,:,c] = (img[i,:,:,c] - mu)/std
+                if std < 1.0e-12:
+                    raise ValueError("Standard Deviation is too small. Watch out!")
+    else:
+        # Loading initial dimensions
+        [N,C,P,Q] = img.shape;
+
+        # Looping for all images and channels
+        for i in range(N):
+            for c in range(C):
+                mu = np.mean(np.squeeze(img[i,c,:,:]))
+                std = np.std(np.squeeze(img[i,c,:,:]))
+                img[i,c,:,:] = (img[i,c,:,:] - mu)/std
+                if std < 1.0e-12:
+                    raise ValueError("Standard Deviation is too small. Watch out!")
 
     return img;
 
-def pad_array(arr, new_dim=(256, 256)):
+def pad_array(arr, new_dim=(OT_WIDTH, OT_HEIGHT)):
 
     # Loading initial derivatives
     dy = new_dim[0] - arr.shape[0]

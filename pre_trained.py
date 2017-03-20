@@ -7,7 +7,7 @@ from keras.preprocessing import image
 from os.path import join
 
 # Default directory
-root_out = '/home/serim/src/LibKeras'
+root_out = '/home/gustavo/src/LibKeras'
 
 # Predictions path
 predictions_path = join(root_out, 'predictions/' + 'imagenet_predictions.json');

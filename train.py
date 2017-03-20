@@ -13,11 +13,11 @@ from os.path import join
 from sklearn.model_selection import train_test_split
 
 # Default directory
-root_out = '/home/gustavo/src/keras'
+root_out = '/home/gustavo/src/LibKeras'
 
 # Type of data entries
 n_runs = 1
-datasets = [{'name': 'imagenet', 'n_classes': 2}]
+datasets = [{'name': 'imagenet', 'n_classes': 25}]
 data_types = [{'type': 'image', 'ref': False}]
 normalization_methods = ['none']
 test_sizes = [0.2]
@@ -26,7 +26,7 @@ params = list(product(datasets, data_types, normalization_methods, test_sizes))
 # Fixed parameters
 learning_rate = 0.01
 batch_size = 128
-n_epochs = 5
+n_epochs = 3
 val_size = 0.1
 metric = 'accuracy'
 loss_func = 'categorical_crossentropy'
@@ -42,7 +42,7 @@ for d, dt, nm, ts in params:
 
         # Building CNN, note that you can choose the build function according to common.py
         cnet = common.ConvNet()
-        cnet.build_vgg16(include_top=True, weights=None, classes=d['n_classes'])
+        cnet.build_resnet50(include_top=True, weights=None, classes=d['n_classes'])
 
 	# Training current network
         cnet.train(data_train, lab_train, d['n_classes'], learning_rate=learning_rate, batch_size=batch_size, n_epochs=n_epochs, validation_size=val_size, metric=metric, loss_func=loss_func)
