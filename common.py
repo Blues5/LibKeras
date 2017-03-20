@@ -1,4 +1,5 @@
 import json
+from architectures.SampleNet import SampleNet
 from keras.applications import ResNet50, VGG16, VGG19
 from keras.optimizers import SGD
 from keras.utils import np_utils
@@ -17,7 +18,7 @@ class ConvNet:
 
         return
 
-    def build_resnet50(self, include_top=True, weights=None, classes=1000):
+    def build_resnet50(self, include_top=True, weights=None, input_shape=None, classes=1000):
 
 	# Creating ResNet50 Model
         model = ResNet50(include_top=include_top, weights=weights, classes=classes)
@@ -32,7 +33,7 @@ class ConvNet:
 
         return
 
-    def build_vgg16(self, include_top=True, weights=None, classes=1000):
+    def build_vgg16(self, include_top=True, weights=None, input_shape=None, classes=1000):
 
 	# Creating VGG16 Model
         model = VGG16(include_top=include_top, weights=weights, classes=classes)
@@ -47,10 +48,25 @@ class ConvNet:
 
         return
 
-    def build_vgg19(self, include_top=True, weights=None, classes=1000):
+    def build_vgg19(self, include_top=True, weights=None, input_shape=None, classes=1000):
 
 	# Creating VGG19 Model
         model = VGG19(include_top=include_top, weights=weights, classes=classes)
+        if weights != None:
+                self._trained = True
+        
+        # Print model summary
+        model.summary()
+
+        # Applying model to ConvNet class
+        self.model = model
+
+        return
+
+    def build_samplenet(self, include_top=True, weights=None, input_shape=None, classes=2):
+
+	# Creating SampleNet Model
+        model = SampleNet(include_top=include_top, weights=weights, input_shape=input_shape, classes=classes)
         if weights != None:
                 self._trained = True
         
