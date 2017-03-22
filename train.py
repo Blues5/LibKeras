@@ -52,7 +52,7 @@ for d, dt, nm, ts in params:
         cnet.compile(learning_rate=learning_rate, momentum=momentum, decay=decay, nesterov=nesterov, metric=metric, loss_func=loss_func)
 
 		# Training current network
-        cnet.train(data_train, lab_train, d['n_classes'], batch_size=batch_size, n_epochs=n_epochs, validation_size=val_size)
+        cnet.train(data_train, lab_train, d['n_classes'], batch_size=batch_size, n_epochs=n_epochs, validation_size=val_size, loss_func=loss_func)
 
         # Evaluating current network
         acc = cnet.evaluate(data_test, lab_test, d['n_classes'], batch_size)

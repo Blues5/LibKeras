@@ -94,7 +94,7 @@ class ConvNet:
 
         return
 
-    def train(self, data_train, labels_train, n_classes, batch_size=32, n_epochs=20, validation_size=0.05):
+    def train(self, data_train, labels_train, n_classes, batch_size=32, n_epochs=20, validation_size=0.05, loss_func='binary_crossentropy'):
 
 		# Check if model has been built
         if self.model is None:
@@ -102,7 +102,7 @@ class ConvNet:
             return
 
 		# Apply categorical format for labels
-        if n_classes > 2:
+        if n_classes > 2 or loss_func == 'categorical_crossentropy':
             labels_train = np_utils.to_categorical(labels_train, n_classes)
             self._to_categorical = True
 
@@ -164,13 +164,20 @@ class ConvNet:
 
     def save_model(self, fpath):
 
-	# Converting model to json
+		# Converting model to json
         model_json = self.model.to_json()
 
-	# Saving model in json file
+		# Saving model in json file
         with open(fpath, "w") as json_file:
                 json_file.write(model_json)
         return
+
+    def load_model(self, fpath):
+
+		# Converting json to model
+        model = model_from_json(fpath)
+
+        return model
 
     def save_weight(self, fpath):
 
