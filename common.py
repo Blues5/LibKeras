@@ -164,20 +164,18 @@ class ConvNet:
 
     def save_model(self, fpath):
 
-		# Converting model to json
-        model_json = self.model.to_json()
+		# Saving trained model
+		self.model.save(fpath, overwrite=True)
 
-		# Saving model in json file
-        with open(fpath, "w") as json_file:
-                json_file.write(model_json)
         return
 
     def load_model(self, fpath):
 
-		# Converting json to model
-        model = model_from_json(fpath)
+		# Loading trained model
+        self.model = load_model(fpath)
+        self._trained = True
 
-        return model
+        return
 
     def save_weight(self, fpath):
 

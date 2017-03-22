@@ -58,7 +58,7 @@ for d, dt, nm, ts in params:
         acc = cnet.evaluate(data_test, lab_test, d['n_classes'], batch_size)
 
 		# Saving network model
-        mname = '%s_model.json' % (d['name'])
+        mname = '%s_model.h5' % (d['name'])
         cnet.save_model(join(root_out, 'models', mname))
 
         # Saving trained network weights
