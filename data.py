@@ -54,7 +54,7 @@ def load_data(dataset, data_type, ref, normalization_method):
     We appreciate and thank Liam Cattell from UVa's BME Department for scripting this data.py!
     """
 
-    root = '/home/gustavo/src/LibKeras/data'
+    root = '/Users/gustavo/Documents/LibKeras/data'
 
     # Check if the data type exists (image, ot or derivative)
     if data_type == 'image':

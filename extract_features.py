@@ -7,7 +7,7 @@ from keras.preprocessing import image
 from os.path import join
 
 # Default directory
-root_out = '/home/gustavo/src/LibKeras'
+root_out = '/Users/gustavo/Documents/LibKeras'
 
 # Creating and instanciating the chosen CNN
 cnet = common.ConvNet()
