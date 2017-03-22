@@ -25,6 +25,9 @@ params = list(product(datasets, data_types, normalization_methods, test_sizes))
 
 # Fixed parameters
 learning_rate = 0.01
+momentum = 0.9
+decay = 0.0005
+nesterov = True
 batch_size = 128
 n_epochs = 90
 val_size = 0.1
@@ -45,13 +48,16 @@ for d, dt, nm, ts in params:
         cnet = common.ConvNet()
         cnet.build_resnet50(include_top=True, weights=None, input_shape=input_shape, classes=d['n_classes'])
 
-	# Training current network
-        cnet.train(data_train, lab_train, d['n_classes'], learning_rate=learning_rate, batch_size=batch_size, n_epochs=n_epochs, validation_size=val_size, metric=metric, loss_func=loss_func)
+		# Compiling current network
+        cnet.compile(learning_rate=learning_rate, momentum=momentum, decay=decay, nesterov=nesterov, metric=metric, loss_func=loss_func)
+
+		# Training current network
+        cnet.train(data_train, lab_train, d['n_classes'], batch_size=batch_size, n_epochs=n_epochs, validation_size=val_size)
 
         # Evaluating current network
         acc = cnet.evaluate(data_test, lab_test, d['n_classes'], batch_size)
 
-	# Saving network model
+		# Saving network model
         mname = '%s_model.json' % (d['name'])
         cnet.save_model(join(root_out, 'models', mname))
 
