@@ -15,10 +15,10 @@ n_predictions = 2
 root = common.default_path()
 
 # Model path
-model_path = join(root, '/outputs/models/' + dataset + '_model.h5');
+model_path = join(root, 'outputs/models/' + dataset + '_model.h5');
 
 # Predictions path
-predictions_path = join(root, '/inputs/predictions/' + dataset + '_predictions.json');
+predictions_path = join(root, 'inputs/predictions/' + dataset + '_predictions.json');
 
 # Creating and instanciating the chosen CNN
 cnet = common.ConvNet()

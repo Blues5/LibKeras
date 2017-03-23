@@ -14,10 +14,10 @@ grayscale = True
 root = common.default_path()
 
 # Model path
-model_path = join(root, '/outputs/models/' + dataset + '_model.h5');
+model_path = join(root, 'outputs/models/' + dataset + '_model.h5');
 
 # Predictions path
-predictions_path = join(root, '/inputs/predictions/' + dataset + '_predictions.json');
+predictions_path = join(root, 'inputs/predictions/' + dataset + '_predictions.json');
 
 # Creating and instanciating the chosen CNN
 cnet = common.ConvNet()
@@ -38,7 +38,7 @@ features = np.ndarray.flatten(features)
 print("\n[INFO] Output array shape:", features.shape)
 
 # Features output path
-features_path = join(root, '/outputs/features/' + img_path + '_features.txt');
+features_path = join(root, 'outputs/features/' + img_path + '_features.txt');
 
 # Saving output
 np.savetxt(features_path, features, fmt='%f')

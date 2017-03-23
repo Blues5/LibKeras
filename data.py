@@ -96,6 +96,9 @@ def load_matlab(dataset, root):
 	labels = np.array(l)
 	data = np.array(x)
 
+	# Transposing back to matlab format
+	data = np.transpose(data, (0, 2, 1))
+
 	# Getting actual data format
 	data_format = K.image_data_format()
 	assert data_format in {'channels_last', 'channels_first'}
