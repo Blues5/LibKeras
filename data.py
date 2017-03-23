@@ -8,10 +8,8 @@ from scipy import misc
 from os.path import join, isdir
 import sys
 
-# Input raw dataset dimensions
-WIDTH=224
-HEIGHT=224
-N_CHANNELS=3
+# Input raw dataset number of channels
+N_CHANNELS=1
 
 # Input OT Maps dimensions
 OT_WIDTH=256
@@ -34,7 +32,7 @@ def load_data(dataset, data_type, ref, normalization_method):
 
 	data_type : str (optional)
 	Return images, transport maps or image derivatives
-	('image', 'ot', 'derivative')
+	('image', 'matlab', 'ot', 'derivative')
 
 	ref: bool (optional)
 	Whether or not to multiply the reference in OT case
@@ -56,9 +54,11 @@ def load_data(dataset, data_type, ref, normalization_method):
 
 	root = '/Users/gustavo/Documents/LibKeras/data'
 
-	# Check if the data type exists (image, ot or derivative)
+	# Check if the data type exists (image, matlab, ot or derivative)
 	if data_type == 'image':
 		data, labels = load_image(dataset, root)
+	if data_type == 'matlab':
+		data, labels = load_matlab(dataset, root)
 	elif data_type == 'ot':
 		data, labels = load_ot(dataset, root)
 	elif data_type == 'derivative':
@@ -82,35 +82,28 @@ def load_data(dataset, data_type, ref, normalization_method):
 
 	return data, labels
 
-def load_image(dataset, root):
+def load_matlab(dataset, root):
 
-	# Amount of files to read
-	N_FILES = 1
+	# Path to .mat file
+	fpath = join(root, 'raw', dataset + '.mat')
 
-	# Load input .mat files
-	paths = list()
-	for i in range(0, N_FILES):
-		fpath = join(root, 'raw', dataset + '_' + str(i+1) + '.mat')
-		paths.append(fpath)
+	# Loading input .mat
+	f = h5py.File(fpath)
+	l = f["l"]
+	x = f["x"]
+	labels = np.array(l) - 1
+	data = np.array(x)
 
-	labels = np.empty((0, 1))
-	# Instanciating data array according to backend's data format
+	# Getting actual data format
 	data_format = K.image_data_format()
 	assert data_format in {'channels_last', 'channels_first'}
-	if data_format == 'channels_last':
-		data = np.empty((0, WIDTH, HEIGHT, N_CHANNELS))
-	else:
-		data = np.empty((0, N_CHANNELS, WIDTH, HEIGHT))
 
-	# Looping and concatenating all .mat files
-	for k in paths:
-		f = h5py.File(k)
-		l = f["l"]
-		x = f["x"]
-		label = np.array(l) - 1
-		datamat = np.array(x)
-		labels = np.concatenate((labels, label), axis=0)
-		data = np.concatenate((data, datamat), axis=0)
+	# If grayscale image, needs to add an extra dimension
+	if N_CHANNELS == 1:
+		if data_format == 'channels_last':
+			data = np.expand_dims(data, axis=3)
+		else:
+			data = np.expand_dims(data, axis=1)
 
 	return data, labels
 
