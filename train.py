@@ -13,7 +13,7 @@ from os.path import join
 from sklearn.model_selection import train_test_split
 
 # Default directory
-root_out = '/Users/gustavo/Documents/LibKeras'
+root_out = common.default_path() + '/outputs'
 
 # Type of data entries
 n_runs = 1

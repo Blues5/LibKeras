@@ -1,11 +1,12 @@
+import common
+import glob
 import h5py
 import numpy as np
 import pandas as pd
-import glob
 from keras import backend as K
+from os.path import join, isdir
 from scipy import io
 from scipy import misc
-from os.path import join, isdir
 import sys
 
 # Input raw dataset number of channels
@@ -21,7 +22,8 @@ def load_data(dataset, data_type, ref, normalization_method):
 	Load a dataset in either image space or transport space.
 
 	This function assumes that the data are stored in:
-	root/data/raw
+	root/data/images
+	root/data/matlab
 	root/data/ot_maps
 	root/data/references
 
@@ -52,7 +54,7 @@ def load_data(dataset, data_type, ref, normalization_method):
 	We appreciate and thank Liam Cattell from UVa's BME Department for scripting this data.py!
 	"""
 
-	root = '/Users/gustavo/Documents/LibKeras/data'
+	root = common.default_path() + '/data'
 
 	# Check if the data type exists (image, matlab, ot or derivative)
 	if data_type == 'image':

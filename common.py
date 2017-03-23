@@ -5,6 +5,13 @@ from keras.models import load_model
 from keras.optimizers import SGD
 from keras.utils import np_utils
 
+def default_path():
+
+	# Config your default path according to your needs
+	path = '/Users/gustavo/Documents/LibKeras'
+
+	return path
+
 class ConvNet:
 	"""
 	Keras wrapper for Convolutional Neural Networks
