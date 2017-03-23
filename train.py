@@ -17,8 +17,8 @@ root_out = common.default_path() + '/outputs'
 
 # Type of data entries
 n_runs = 1
-datasets = [{'name': 'imagenet', 'n_classes': 1000}]
-data_types = [{'type': 'image', 'ref': False}]
+datasets = [{'name': 'brain', 'n_classes': 2}]
+data_types = [{'type': 'matlab', 'ref': False}]
 normalization_methods = ['none']
 test_sizes = [0.2]
 params = list(product(datasets, data_types, normalization_methods, test_sizes))
@@ -28,7 +28,7 @@ learning_rate = 0.01
 momentum = 0.9
 decay = 0.0005
 nesterov = True
-batch_size = 128
+batch_size = 32
 n_epochs = 90
 val_size = 0.1
 metric = 'accuracy'
@@ -46,7 +46,7 @@ for d, dt, nm, ts in params:
 
 		# Building CNN, note that you can choose the build function according to common.py
 		cnet = common.ConvNet()
-		cnet.build_resnet50(include_top=True, weights=None, input_shape=input_shape, classes=d['n_classes'])
+		cnet.build_samplenet(include_top=True, weights=None, input_shape=input_shape, classes=d['n_classes'])
 
 		# Compiling current network
 		cnet.compile(learning_rate=learning_rate, momentum=momentum, decay=decay, nesterov=nesterov, metric=metric, loss_func=loss_func)
