@@ -6,28 +6,33 @@ from keras.applications.imagenet_utils import preprocess_input
 from keras.preprocessing import image
 from os.path import join
 
+# Input parameters
+dataset = 'brain'
+grayscale = True
+n_predictions = 2
+
 # Default directory
-root_in = common.default_path() + '/inputs'
+root = common.default_path()
+
+# Model path
+model_path = join(root, '/outputs/models/' + dataset + '_model.h5');
 
 # Predictions path
-predictions_path = join(root_in, 'predictions/' + 'imagenet_predictions.json');
+predictions_path = join(root, '/inputs/predictions/' + dataset + '_predictions.json');
 
 # Creating and instanciating the chosen CNN
 cnet = common.ConvNet()
-cnet.build_resnet50(include_top=True, weights='imagenet', classes=1000)
-#cnet.build_vgg16(include_top=True, weights='imagenet', classes=1000)
-#cnet.build_vgg19(include_top=True, weights='imagenet', classes=1000)
+cnet.load_model(model_path)
 
 # Loading and pre-processing input image
-img_path = 'dog.jpg'
-img = image.load_img(img_path, target_size=(224, 224))
+img_path = ''
+img = image.load_img(img_path, grayscale=grayscale)
 x = image.img_to_array(img)
 x = np.expand_dims(x, axis=0)
-x = preprocess_input(x)
 print('Input image shape:', x.shape)
 
 # Predicting input image
 preds = cnet.predict(x, batch_size=1)
-print('Predicted:', cnet.decode_predictions(preds, path=predictions_path, top=5))
+print('Predicted:', cnet.decode_predictions(preds, path=predictions_path, top=n_predictions))
 
 import gc; gc.collect()

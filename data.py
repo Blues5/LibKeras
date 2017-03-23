@@ -87,13 +87,13 @@ def load_data(dataset, data_type, ref, normalization_method):
 def load_matlab(dataset, root):
 
 	# Path to .mat file
-	fpath = join(root, 'raw', dataset + '.mat')
+	fpath = join(root, 'matlab', dataset + '.mat')
 
 	# Loading input .mat
 	f = h5py.File(fpath)
 	l = f["l"]
 	x = f["x"]
-	labels = np.array(l) - 1
+	labels = np.array(l)
 	data = np.array(x)
 
 	# Getting actual data format

@@ -7,10 +7,10 @@ from keras.utils import np_utils
 
 def default_path():
 
-	# Config your default path according to your needs
-	path = '/Users/gustavo/Documents/LibKeras'
+	# Config your default root path according to your folder
+	root_path = '/Users/gustavo/Documents/LibKeras'
 
-	return path
+	return root_path
 
 class ConvNet:
 	"""
