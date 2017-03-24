@@ -2,7 +2,6 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL']='3'
 import common
 import numpy as np
-from keras.applications.imagenet_utils import preprocess_input
 from keras.preprocessing import image
 from os.path import join
 
