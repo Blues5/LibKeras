@@ -96,19 +96,23 @@ def load_matlab(dataset, root):
 	labels = np.array(l)
 	data = np.array(x)
 
-	# Transposing back to matlab format
-	data = np.transpose(data, (0, 2, 1))
-
 	# Getting actual data format
 	data_format = K.image_data_format()
 	assert data_format in {'channels_last', 'channels_first'}
 
-	# If grayscale image, needs to add an extra dimension
-	if N_CHANNELS == 1:
-		if data_format == 'channels_last':
+	# Transposing back to matlab format
+	if data_format == 'channels_last':
+		if N_CHANNELS == 1:
+			data = np.transpose(data, (0, 2, 1))
 			data = np.expand_dims(data, axis=3)
 		else:
+			data = np.transpose(data, (0, 3, 2, 1))
+	else:
+		if N_CHANNELS == 1:
+			data = np.transpose(data, (0, 2, 1))
 			data = np.expand_dims(data, axis=1)
+		else:
+			data = np.transpose(data, (0, 1, 3, 2))
 
 	return data, labels
 

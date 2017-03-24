@@ -10,9 +10,10 @@ from keras.models import Model
 from keras.layers import Convolution2D, GlobalMaxPooling2D, AveragePooling2D, GlobalAveragePooling2D
 from keras.layers import Input
 from keras.layers.core import Dense, Flatten
+from keras.utils import layer_utils
 
-WEIGHTS_PATH = '/home/gustavo/src/LibKeras/weights/trained.h5'
-WEIGHTS_PATH_NO_TOP = '/home/gustavo/src/LibKeras/weights/trained_no_top.h5'
+WEIGHTS_PATH = '/Users/gustavo/Documents/LibKeras/weights/trained.h5'
+WEIGHTS_PATH_NO_TOP = '/Users/gustavo/Documents/LibKeras/weights/trained_no_top.h5'
 
 def SampleNet(include_top=True, weights='trained', input_shape=None, pooling=None, classes=2):
 
@@ -54,7 +55,7 @@ def SampleNet(include_top=True, weights='trained', input_shape=None, pooling=Non
 
 	if K.image_data_format() == 'channels_first':
 		if include_top:
-			maxpool = model.get_layer(name='block5_pool')
+			maxpool = model.get_layer(name='pool1')
 			shape = maxpool.output_shape[1:]
 			dense = model.get_layer(name='fc1')
 			layer_utils.convert_dense_weights_data_format(dense, shape, 'channels_first')
