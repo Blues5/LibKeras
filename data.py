@@ -4,6 +4,7 @@ import h5py
 import numpy as np
 import pandas as pd
 from keras import backend as K
+from os import listdir
 from os.path import join, isdir
 from scipy import io
 from scipy import misc
@@ -59,7 +60,7 @@ def load_data(dataset, data_type, ref, normalization_method):
 	# Check if the data type exists (image, matlab, ot or derivative)
 	if data_type == 'image':
 		data, labels = load_image(dataset, root)
-	if data_type == 'matlab':
+	elif data_type == 'matlab':
 		data, labels = load_matlab(dataset, root)
 	elif data_type == 'ot':
 		data, labels = load_ot(dataset, root)
@@ -81,6 +82,43 @@ def load_data(dataset, data_type, ref, normalization_method):
 		data = data
 	else:
 		raise ValueError("Unknown normalization method: '%s'" % data_type)
+
+	return data, labels
+
+def load_image(dataset, root):
+
+	# Path to image files
+	fpath = join(root, 'images', dataset, dataset + '.txt')
+
+	# Creating array of image paths and labels
+	imlist = np.loadtxt(fpath, dtype=bytes, usecols=0).astype(str)
+	labels = np.loadtxt(fpath, dtype=int, usecols=1)
+
+	# Getting amount of images
+	im_amount = imlist.shape[0]
+
+	data = []
+	# Loading images
+	for i in range(im_amount):
+		fpath = join(root, 'images', dataset, imlist[i])
+		im = misc.imread(fpath)
+		data.append(im)
+
+	data = np.array(data)
+
+	# Getting actual data format
+	data_format = K.image_data_format()
+	assert data_format in {'channels_last', 'channels_first'}
+
+	# Transposing back to matlab format
+	if data_format == 'channels_last':
+		if N_CHANNELS == 1:
+			data = np.expand_dims(data, axis=3)
+	else:
+		if N_CHANNELS == 1:
+			data = np.expand_dims(data, axis=1)
+		else:
+			data = np.transpose(data, (0, 3, 1, 2))
 
 	return data, labels
 
