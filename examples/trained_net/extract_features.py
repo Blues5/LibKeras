@@ -1,9 +1,16 @@
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL']='3'
+import argparse
 import common
 import numpy as np
+import sys
 from keras.preprocessing import image
 from os.path import join
+
+# Parsing input arguments
+parser = argparse.ArgumentParser(description='Feature extraction with own trained weights')
+parser.add_argument('-i','--image', help='image path to extract features', required=True)
+args = vars(parser.parse_args())
 
 # Input parameters
 dataset = 'brain'
@@ -23,7 +30,7 @@ cnet = common.ConvNet()
 cnet.load_model(model_path)
 
 # Loading and pre-processing input image
-img_path = ''
+img_path = sys.argv[2]
 img = image.load_img(img_path, grayscale=grayscale)
 x = image.img_to_array(img)
 x = np.expand_dims(x, axis=0)
