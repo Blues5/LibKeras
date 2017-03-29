@@ -7,6 +7,7 @@ import sys
 from keras.applications.imagenet_utils import preprocess_input
 from keras.preprocessing import image
 from os.path import join
+from PIL import Image, ImageOps
 
 # Parsing input arguments
 parser = argparse.ArgumentParser(description='Pre-trained classification with imagenet weights')
@@ -27,7 +28,8 @@ cnet.build_resnet50(include_top=True, weights='imagenet', classes=1000)
 
 # Loading and pre-processing input image
 img_path = sys.argv[2]
-img = image.load_img(img_path, target_size=(224, 224))
+img = image.load_img(img_path)
+img = ImageOps.fit(img, (224, 224), Image.ANTIALIAS)
 x = image.img_to_array(img)
 x = np.expand_dims(x, axis=0)
 x = preprocess_input(x)
