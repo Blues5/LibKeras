@@ -1,6 +1,6 @@
 import json
 from architectures.SampleNet import SampleNet
-from keras.applications import ResNet50, VGG16, VGG19
+from keras.applications import ResNet50, VGG16, VGG19, InceptionV3
 from keras.models import load_model
 from keras.optimizers import SGD
 from keras.utils import np_utils
@@ -60,6 +60,21 @@ class ConvNet:
 
 		# Creating VGG19 Model
 		model = VGG19(include_top=include_top, weights=weights, classes=classes)
+		if weights != None:
+			self._trained = True
+
+		# Print model summary
+		model.summary()
+
+		# Applying model to ConvNet class
+		self.model = model
+
+		return
+
+	def build_inception3(self, include_top=True, weights=None, input_shape=None, classes=1000):
+
+		# Creating InceptionV3 Model
+		model = InceptionV3(include_top=include_top, weights=weights, classes=classes)
 		if weights != None:
 			self._trained = True
 
