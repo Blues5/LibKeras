@@ -12,6 +12,12 @@ def default_path():
 
 	return root_path
 
+def preprocess_inception(x):
+	x /= 255.
+	x -= 0.5
+	x *= 2.
+	return x
+
 class ConvNet:
 	"""
 	Keras wrapper for Convolutional Neural Networks

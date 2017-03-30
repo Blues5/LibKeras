@@ -25,14 +25,21 @@ cnet = common.ConvNet()
 cnet.build_resnet50(include_top=True, weights='imagenet', classes=1000)
 #cnet.build_vgg16(include_top=True, weights='imagenet', classes=1000)
 #cnet.build_vgg19(include_top=True, weights='imagenet', classes=1000)
+#cnet.build_inception3(include_top=True, weights='imagenet', classes=1000)
 
 # Loading and pre-processing input image
 img_path = sys.argv[2]
 img = image.load_img(img_path)
+
+# ResNet50, VGG16 and VGG19 uses (224,224) while InceptionV3 uses (299,299)
 img = ImageOps.fit(img, (224, 224), Image.ANTIALIAS)
 x = image.img_to_array(img)
 x = np.expand_dims(x, axis=0)
+
+# Use preprocess_input() for ResNet50, VGG16 and VGG19, and preprocess_inception() for InceptionV3
 x = preprocess_input(x)
+#x = common.preprocess_inception(x)
+
 print('Input image shape:', x.shape)
 
 # Predicting input image
